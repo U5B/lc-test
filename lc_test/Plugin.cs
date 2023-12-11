@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using BepInEx.Configuration;
 using HarmonyLib;
 using lc_test.Patches;
@@ -24,7 +26,18 @@ namespace lc_test
 			Harmony harmony = new Harmony(GUID);
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-			ScenePatch.Awake();
+			SceneManager.activeSceneChanged += ActiveSceneChanged;
+		}
+
+		private static void ActiveSceneChanged(Scene arg0, Scene arg1)
+		{
+			Terminal terminal = UnityEngine.Object.FindObjectOfType<Terminal>();
+			if (terminal == null)
+			{
+				return;
+			}
+			terminal.terminalUIScreen.renderMode = RenderMode.ScreenSpaceOverlay;
+			terminal.terminalUIScreen.scaleFactor += 1.35f;
 		}
 	}
 }

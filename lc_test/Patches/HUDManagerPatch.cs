@@ -1,7 +1,6 @@
 
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace lc_test.Patches
@@ -43,31 +42,6 @@ namespace lc_test.Patches
 				HUDManager.Instance.ChangeControlTip(0, string.Empty, true);
 				GameNetworkManager.Instance.localPlayerController.inSpecialInteractAnimation = true;
 			}
-		}
-	}
-
-	public class ScenePatch
-	{
-		[HarmonyPatch(typeof(Terminal))]
-		[HarmonyPrefix]
-		[HarmonyPatch("QuitTerminal")]
-		public static void DoneInteractingWithTerminal()
-		{
-			GameNetworkManager.Instance.localPlayerController.inSpecialInteractAnimation = false;
-		}
-		public static void Awake()
-		{
-			SceneManager.activeSceneChanged += ActiveSceneChanged;
-		}
-		private static void ActiveSceneChanged(Scene arg0, Scene arg1)
-		{
-			Terminal terminal = UnityEngine.Object.FindObjectOfType<Terminal>();
-			if (terminal == null)
-			{
-				return;
-			}
-			terminal.terminalUIScreen.renderMode = RenderMode.ScreenSpaceOverlay;
-			terminal.terminalUIScreen.scaleFactor += 1.35f;
 		}
 	}
 }

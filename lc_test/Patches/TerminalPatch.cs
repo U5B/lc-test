@@ -26,6 +26,13 @@ namespace lc_test.Patches
 			return false;
 		}
 
+		[HarmonyPrefix]
+		[HarmonyPatch("QuitTerminal")]
+		public static void DoneInteractingWithTerminal()
+		{
+			GameNetworkManager.Instance.localPlayerController.inSpecialInteractAnimation = false;
+		}
+
 		[HarmonyPostfix]
 		[HarmonyPatch("ParsePlayerSentence")]
 		private static void HandleTerminalCommands(ref Terminal __instance, ref TerminalNode __result)
@@ -148,9 +155,20 @@ namespace lc_test.Patches
 				};
 				return;
 			}
-			else if (parameters[0] == "dt" || parameters[0] == "dm")
+			else if (parameters[0] == "dm")
 			{
-				DisableTurretsAndMines();
+				DisableMines();
+				__instance.PlayBroadcastCodeEffect();
+				__result = new TerminalNode
+				{
+					displayText = "",
+					playSyncedClip = -1
+				};
+				return;
+			}
+			else if (parameters[0] == "dt")
+			{
+				DisableTurrets();
 				__instance.PlayBroadcastCodeEffect();
 				__result = new TerminalNode
 				{
@@ -263,12 +281,24 @@ namespace lc_test.Patches
 			};
 		}
 
-		private static void DisableTurretsAndMines()
+		private static void DisableMines()
 		{
 			TerminalAccessibleObject[] terminalCodes = UnityEngine.Object.FindObjectsOfType<TerminalAccessibleObject>();
 			foreach (TerminalAccessibleObject code in terminalCodes)
 			{
-				if (!code.isBigDoor)
+				if (code.name.Contains("Landmine"))
+				{
+					code.CallFunctionFromTerminal();
+				}
+			}
+		}
+
+		private static void DisableTurrets()
+		{
+			TerminalAccessibleObject[] terminalCodes = UnityEngine.Object.FindObjectsOfType<TerminalAccessibleObject>();
+			foreach (TerminalAccessibleObject code in terminalCodes)
+			{
+				if (code.name.Contains("TurretScript"))
 				{
 					code.CallFunctionFromTerminal();
 				}
